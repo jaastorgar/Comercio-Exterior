@@ -1,0 +1,17 @@
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos generales */
+body {
+  font-family: system-ui, Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #1f2937;
+}
+
+main {
+  min-height: 100vh;
+}

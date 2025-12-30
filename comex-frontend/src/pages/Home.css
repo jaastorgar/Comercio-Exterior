@@ -1,0 +1,43 @@
+.home {
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.home h1 {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.descripcion {
+  font-size: 18px;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.lista {
+  list-style: none;
+  padding-left: 0;
+}
+
+.lista li {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.estado-backend {
+  margin-top: 32px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #e5e7eb;
+}
+
+.ok {
+  color: #065f46;
+  font-weight: 600;
+}
+
+.error {
+  color: #991b1b;
+  font-weight: 600;
+}

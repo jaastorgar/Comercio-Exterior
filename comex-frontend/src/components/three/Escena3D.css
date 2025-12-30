@@ -1,0 +1,7 @@
+.escena-3d {
+  width: 100%;
+  height: 500px;
+  background-color: #111827;
+  border-radius: 12px;
+  overflow: hidden;
+}
