@@ -1,48 +1,63 @@
-import { apiFetch } from "./client";
+import axios from "axios";
 
-/**
- * Tipos de datos que vienen del backend
- */
-export type PosicionCaja = {
-  x_cm: number;
-  y_cm: number;
-  z_cm: number;
-};
+/* =========================
+   Tipos
+========================= */
+export type ContainerCode = "20DV" | "40HC";
 
-export type RespuestaCubicaje = {
-  container: {
-    code: string;
-    length_cm: number;
-    width_cm: number;
-    height_cm: number;
-  };
+export interface ParametrosCubicaje {
+  container_code: ContainerCode;
   box: {
     length_cm: number;
     width_cm: number;
     height_cm: number;
-    rotated_base: boolean;
+  };
+  quantity: number;
+  allow_rotation: boolean;
+}
+
+export interface BoxPosition {
+  x: number;
+  y: number;
+  z: number;
+  rotation?: [number, number, number];
+}
+
+export interface RespuestaCubicaje {
+  container: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  box: {
+    length: number;
+    width: number;
+    height: number;
   };
   fit_count: number;
   requested: number;
-  positions: PosicionCaja[];
-  note: string;
-};
+  boxes: BoxPosition[];
+}
 
-/**
- * Llamada al backend para calcular cubicaje
- */
-export function obtenerCubicaje() {
-  return apiFetch<RespuestaCubicaje>("/logistics/pack/", {
-    method: "POST",
-    body: JSON.stringify({
-      container_code: "20DV",
-      box: {
-        length_cm: 40,
-        width_cm: 30,
-        height_cm: 25,
-      },
-      quantity: 50,
-      allow_rotation: true,
-    }),
-  });
+/* =========================
+   Axios instance
+========================= */
+const api = axios.create({
+  baseURL: "http://localhost:8000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+/* =========================
+   API call (RUTA CORRECTA)
+========================= */
+export async function obtenerCubicaje(
+  payload: ParametrosCubicaje
+): Promise<RespuestaCubicaje> {
+  const res = await api.post(
+    "/api/logistics/pack/",
+    payload
+  );
+  return res.data;
 }

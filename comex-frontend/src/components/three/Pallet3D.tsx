@@ -1,9 +1,3 @@
-/**
- * Pallet3D
- * --------
- * Representa un pallet estándar (americano).
- */
-
 type Props = {
   x: number;
   y: number;
@@ -12,9 +6,9 @@ type Props = {
 
 export default function Pallet3D({ x, y, z }: Props) {
   return (
-    <mesh position={[x, y + 0.075, z]}>
-      <boxGeometry args={[1.2, 0.15, 1]} />
-      <meshStandardMaterial color="#a16207" />
+    <mesh position={[x, y, z]} receiveShadow>
+      <boxGeometry args={[1.2, 0.14, 1]} />
+      <meshStandardMaterial color="#7c3f1d" />
     </mesh>
   );
 }

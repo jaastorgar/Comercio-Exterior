@@ -1,66 +1,27 @@
-import { useMemo } from "react";
+import * as THREE from "three";
 
-/**
- * Props del contenedor 3D
- */
 type Props = {
-  length_cm: number;
-  width_cm: number;
-  height_cm: number;
+  length: number;
+  width: number;
+  height: number;
 };
 
-function cmAMetros(valor: number) {
-  return valor / 100;
-}
-
-export default function Contenedor3D({
-  length_cm,
-  width_cm,
-  height_cm,
-}: Props) {
-  const dimensiones = useMemo(
-    () => [
-      cmAMetros(length_cm),
-      cmAMetros(height_cm),
-      cmAMetros(width_cm),
-    ] as [number, number, number],
-    [length_cm, width_cm, height_cm]
-  );
-
-  const posicion: [number, number, number] = [
-    dimensiones[0] / 2,
-    dimensiones[1] / 2,
-    dimensiones[2] / 2,
-  ];
+export default function Contenedor3D({ length, width, height }: Props) {
+  const geom = new THREE.BoxGeometry(length, height, width);
+  const edges = new THREE.EdgesGeometry(geom);
 
   return (
-    <>
-      {/* Piso del contenedor */}
-      <mesh
-        position={[
-          dimensiones[0] / 2,
-          0,
-          dimensiones[2] / 2,
-        ]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry
-          args={[dimensiones[0], dimensiones[2]]}
-        />
-        <meshStandardMaterial
-          color="#374151"
-          side={2}
-        />
-      </mesh>
+    <group position={[0, height / 2, 0]}>
+      {/* Wireframe */}
+      <lineSegments geometry={edges}>
+        <lineBasicMaterial color="#e5e7eb" opacity={0.6} transparent />
+      </lineSegments>
 
-      {/* Contenedor wireframe */}
-      <mesh position={posicion}>
-        <boxGeometry args={dimensiones} />
-        <meshBasicMaterial
-          color="#e5e7eb"
-          wireframe
-        />
+      {/* Piso */}
+      <mesh position={[0, -height / 2 + 0.01, 0]} receiveShadow>
+        <boxGeometry args={[length, 0.02, width]} />
+        <meshStandardMaterial color="#3f2a14" />
       </mesh>
-    </>
+    </group>
   );
 }

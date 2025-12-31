@@ -1,114 +1,119 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useEffect, useState } from "react";
-import { AxesHelper, GridHelper } from "three";
-import "./Escena3D.css";
+import { OrbitControls, Grid } from "@react-three/drei";
+import { useMemo } from "react";
 
-import { obtenerCubicaje } from "../../api/cubicaje";
-import type { RespuestaCubicaje } from "../../api/cubicaje";
-import { Contenedor3D, Pallet3D } from "./index";
+import Caja3D from "./Caja3D";
+import Pallet3D from "./Pallet3D";
+import Contenedor3D from "./Contenedor3D";
 
-/**
- * Conversión cm → metros
- */
-function cmAMetros(valor: number) {
-  return valor / 100;
-}
+type BoxBackend = {
+  length: number;
+  width: number;
+  height: number;
+};
 
-export default function Escena3D() {
-  const [datos, setDatos] = useState<RespuestaCubicaje | null>(null);
+type PositionBackend = {
+  x: number;
+  y: number;
+  z: number;
+};
 
-  useEffect(() => {
-    obtenerCubicaje()
-      .then((respuesta) => setDatos(respuesta))
-      .catch((error) => {
-        console.error("Error al obtener cubicaje:", error);
-      });
-  }, []);
+type DatosCubicaje = {
+  container: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  box: BoxBackend;
+  positions: PositionBackend[];
+};
 
-  if (!datos) {
-    return <div className="escena-3d">Cargando cubicaje 3D…</div>;
-  }
+type Props = {
+  datos: DatosCubicaje;
+  pallets?: number;
+};
 
-  /* ===============================
-     Dimensiones del contenedor (m)
-     =============================== */
-  const contenedorLargo = cmAMetros(datos.container.length_cm);
-  const contenedorAncho = cmAMetros(datos.container.width_cm);
-  const contenedorAlto  = cmAMetros(datos.container.height_cm);
+const cmToM = (cm: number) => cm / 100;
+const safe = (n: number, fallback = 0) =>
+  Number.isFinite(n) ? n : fallback;
 
-  /* ===============================
-     Dimensiones de la caja (m)
-     =============================== */
-  const cajaLargo = cmAMetros(datos.box.length_cm);
-  const cajaAncho = cmAMetros(datos.box.width_cm);
-  const cajaAlto  = cmAMetros(datos.box.height_cm);
+export default function Escena3D({ datos, pallets = 0 }: Props) {
+  const L = safe(datos.container.length, 5.9);
+  const W = safe(datos.container.width, 2.35);
+  const H = safe(datos.container.height, 2.39);
 
-  /* ===============================
-     Posición del pallet (centrado)
-     =============================== */
-  const palletX = contenedorLargo / 2;
-  const palletZ = contenedorAncho / 2;
+  const bl = cmToM(safe(datos.box.length, 20));
+  const bw = cmToM(safe(datos.box.width, 20));
+  const bh = cmToM(safe(datos.box.height, 20));
+
+  const offsetX = -L / 2;
+  const offsetZ = -W / 2;
+
+  const MAX_RENDER = 1200;
+
+  const cajas = useMemo(
+    () =>
+      datos.positions.slice(0, MAX_RENDER).map((p, i) => (
+        <Caja3D
+          key={i}
+          x={offsetX + cmToM(p.x) + bl / 2}
+          y={cmToM(p.y) + bh / 2}
+          z={offsetZ + cmToM(p.z) + bw / 2}
+          length={bl}
+          width={bw}
+          height={bh}
+        />
+      )),
+    [datos.positions, bl, bw, bh, offsetX, offsetZ]
+  );
+
+  const palletsMeshes = useMemo(() => {
+    const out = [];
+    const gap = 0.1;
+    const pl = 1.2;
+    const pw = 1.0;
+
+    const cols = Math.max(1, Math.floor(W / (pw + gap)));
+    const rows = Math.max(1, Math.floor(L / (pl + gap)));
+
+    let placed = 0;
+
+    for (let r = 0; r < rows && placed < pallets; r++) {
+      for (let c = 0; c < cols && placed < pallets; c++) {
+        out.push(
+          <Pallet3D
+            key={`p-${placed}`}
+            x={offsetX + pl / 2 + r * (pl + gap)}
+            y={0.02}
+            z={offsetZ + pw / 2 + c * (pw + gap)}
+          />
+        );
+        placed++;
+      }
+    }
+    return out;
+  }, [pallets, L, W, offsetX, offsetZ]);
 
   return (
-    <div className="escena-3d">
-      <Canvas camera={{ position: [8, 5, 8], fov: 45 }}>
-        {/* Luces */}
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[10, 12, 5]} intensity={0.8} />
+    <Canvas
+      shadows
+      camera={{ position: [L, H * 1.2, W], fov: 45 }}
+      style={{ height: 520, marginTop: 24 }}
+    >
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[10, 15, 10]} intensity={1} castShadow />
 
-        {/* Ejes XYZ (X rojo, Y verde, Z azul) */}
-        <primitive object={new AxesHelper(3)} />
+      <OrbitControls makeDefault />
+      <Grid
+        args={[Math.max(L, W) * 2, Math.max(L, W) * 2]}
+        cellSize={0.5}
+        sectionSize={2}
+        fadeDistance={40}
+      />
 
-        {/* Grilla base (referencia de escala) */}
-        <primitive
-          object={new GridHelper(10, 10, "#6b7280", "#374151")}
-        />
-
-        {/* Contenedor 3D (wireframe + piso) */}
-        <Contenedor3D
-          length_cm={datos.container.length_cm}
-          width_cm={datos.container.width_cm}
-          height_cm={datos.container.height_cm}
-        />
-
-        {/* Pallet base */}
-        <Pallet3D
-          x={palletX}
-          y={0.01}   // evita z-fighting con el piso
-          z={palletZ}
-        />
-
-        {/* ===============================
-            Cajas con validación espacial
-           =============================== */}
-        {datos.positions.map((pos, index) => {
-          // Posición de la caja en metros
-          const x = cmAMetros(pos.x_cm);
-          const y = cmAMetros(pos.z_cm); // eje vertical
-          const z = cmAMetros(pos.y_cm);
-
-          // ¿La caja se sale del contenedor?
-          const fuera =
-            x + cajaLargo > contenedorLargo ||
-            z + cajaAncho > contenedorAncho ||
-            y + cajaAlto  > contenedorAlto;
-
-          return (
-            <mesh key={index} position={[x, y, z]}>
-              <boxGeometry
-                args={[cajaLargo, cajaAlto, cajaAncho]}
-              />
-              <meshStandardMaterial
-                color={fuera ? "#ef4444" : "#22c55e"}
-              />
-            </mesh>
-          );
-        })}
-
-        {/* Controles de cámara */}
-        <OrbitControls />
-      </Canvas>
-    </div>
+      <Contenedor3D length={L} width={W} height={H} />
+      {palletsMeshes}
+      {cajas}
+    </Canvas>
   );
 }
