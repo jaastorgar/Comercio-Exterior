@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.conf import settings
 from .models import ProfessionalProfile, ConnectionRequest, Post
 
 
@@ -8,17 +7,14 @@ class ProfessionalProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProfessionalProfile
-        fields = (
-            "id",
-            "email",
-            "role",
-            "skills",
-            "certifications",
-            "bio",
-        )
+        fields = "__all__"
+        read_only_fields = ("user", "created_at")
 
 
 class ConnectionRequestSerializer(serializers.ModelSerializer):
+    from_email = serializers.EmailField(source="from_user.email", read_only=True)
+    to_email = serializers.EmailField(source="to_user.email", read_only=True)
+
     class Meta:
         model = ConnectionRequest
         fields = "__all__"
@@ -30,9 +26,10 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = (
-            "id",
-            "email",
-            "content",
-            "created_at",
-        )
+        fields = "__all__"
+        read_only_fields = ("user", "created_at")
+
+class ConnectionRequestUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConnectionRequest
+        fields = ("status",)

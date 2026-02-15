@@ -1,20 +1,60 @@
 from rest_framework import serializers
+from .models import Container, Pallet, CargoSimulation
 
-class BoxSerializer(serializers.Serializer):
-    length_cm = serializers.FloatField(min_value=0.1)
-    width_cm = serializers.FloatField(min_value=0.1)
-    height_cm = serializers.FloatField(min_value=0.1)
 
-class PackRequestSerializer(serializers.Serializer):
-    container_code = serializers.ChoiceField(choices=["20DV", "40DV", "40HC"])
-    box = BoxSerializer()
-    quantity = serializers.IntegerField(min_value=1, max_value=20000)
-    allow_rotation = serializers.BooleanField(default=True)
+class ContainerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Container
+        fields = "__all__"
 
-class PackResponseSerializer(serializers.Serializer):
-    container = serializers.DictField()
-    box = serializers.DictField()
-    fit_count = serializers.IntegerField()
-    requested = serializers.IntegerField()
-    positions = serializers.ListField(child=serializers.DictField())
-    note = serializers.CharField()
+
+class PalletSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pallet
+        fields = "__all__"
+
+
+class CargoSimulationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CargoSimulation
+        fields = "__all__"
+        read_only_fields = (
+            "user",
+            "total_box_volume",
+            "container_volume",
+            "usage_percentage",
+            "fits",
+            "created_at",
+        )
+
+    def create(self, validated_data):
+        request = self.context["request"]
+        container = validated_data["container"]
+
+        box_volume = (
+            validated_data["box_length"] *
+            validated_data["box_width"] *
+            validated_data["box_height"]
+        )
+
+        total_box_volume = box_volume * validated_data["quantity"]
+        container_volume = container.length * container.width * container.height
+
+        usage_percentage = (total_box_volume / container_volume) * 100
+        fits = total_box_volume <= container_volume
+
+        simulation = CargoSimulation.objects.create(
+            user=request.user,
+            container=container,
+            box_length=validated_data["box_length"],
+            box_width=validated_data["box_width"],
+            box_height=validated_data["box_height"],
+            quantity=validated_data["quantity"],
+            total_box_volume=total_box_volume,
+            container_volume=container_volume,
+            usage_percentage=usage_percentage,
+            fits=fits,
+        )
+
+        return simulation

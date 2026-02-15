@@ -48,4 +48,35 @@ class UserProfile(models.Model):
     ranking_score = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"Perfil de {self.user.email}"
+        return f"Perfil académico de {self.user.email}"
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=200)
+    level_order = models.IntegerField()
+
+    def __str__(self):
+        return self.title
+
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons")
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    order = models.IntegerField()
+
+    def __str__(self):
+        return self.title
+
+
+class UserProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="progress")
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    score = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ("user", "lesson")
+
+    def __str__(self):
+        return f"{self.user.email} - {self.lesson.title}"
