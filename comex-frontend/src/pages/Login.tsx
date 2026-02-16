@@ -1,23 +1,47 @@
-import "./Login.css";
+import { useState } from "react";
+import { login } from "../api/auth";
 
-export default function Login() {
+interface LoginProps {
+  onSuccess: () => void;
+}
+
+export default function Login({ onSuccess }: LoginProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await login(email, password);
+      onSuccess();
+    } catch (error: any) {
+      console.error(error);
+      alert("Error al iniciar sesión");
+    }
+  };
+
   return (
-    <section className="login">
-      <h1>Iniciar sesión</h1>
+    <div>
+      <h2>Login</h2>
 
-      <form>
-        <label>
-          Correo electrónico
-          <input type="email" />
-        </label>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Correo"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-        <label>
-          Contraseña
-          <input type="password" />
-        </label>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
         <button type="submit">Ingresar</button>
       </form>
-    </section>
+    </div>
   );
 }

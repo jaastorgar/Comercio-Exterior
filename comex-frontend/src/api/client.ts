@@ -1,20 +1,31 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export async function apiFetch<T>(
-  ruta: string,
-  opciones?: RequestInit
-): Promise<T> {
-  const respuesta = await fetch(`${API_URL}${ruta}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(opciones?.headers || {}),
-    },
-    ...opciones,
-  });
+export async function apiRequest(
+  endpoint: string,
+  method: string = "GET",
+  data?: any,
+  auth: boolean = false
+) {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
 
-  if (!respuesta.ok) {
-    throw new Error(`Error en la API: ${respuesta.status}`);
+  if (auth) {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
   }
 
-  return respuesta.json();
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error("Error en la petición");
+  }
+
+  return response.json();
 }

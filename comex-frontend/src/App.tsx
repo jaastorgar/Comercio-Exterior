@@ -1,27 +1,59 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Home from "./pages/Home";
-import Servicios from "./pages/Servicios";
+import { useEffect, useState } from "react";
 import Login from "./pages/Login";
-import Cubicaje from "./pages/Cubicaje";
+import Dashboard from "./pages/Dashboard";
+import Register from "./pages/Register";
+import { getProfile } from "./api/auth";
 
-export default function App() {
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [view, setView] = useState<"login" | "register">("login");
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        await getProfile();
+        setIsAuthenticated(true);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div>Cargando...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
   return (
-    <BrowserRouter>
-      <header style={{ padding: 16, background: "#e5e7eb" }}>
-        <nav style={{ display: "flex", gap: 16 }}>
-          <Link to="/">Inicio</Link>
-          <Link to="/servicios">Servicios</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/cubicaje">Cubicaje 3D</Link>
-        </nav>
-      </header>
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/servicios" element={<Servicios />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/cubicaje" element={<Cubicaje />} />
-      </Routes>
-    </BrowserRouter>
+    <div>
+      {view === "login" ? (
+        <>
+          <Login onSuccess={() => setIsAuthenticated(true)} />
+          <p>
+            ¿No tienes cuenta?{" "}
+            <button onClick={() => setView("register")}>
+              Registrarse
+            </button>
+          </p>
+        </>
+      ) : (
+        <>
+          <Register onRegistered={() => setView("login")} />
+          <p>
+            ¿Ya tienes cuenta?{" "}
+            <button onClick={() => setView("login")}>
+              Iniciar sesión
+            </button>
+          </p>
+        </>
+      )}
+    </div>
   );
 }
+
+export default App;
