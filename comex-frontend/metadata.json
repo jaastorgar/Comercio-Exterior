@@ -1,0 +1,8 @@
+{
+  "name": "Comex Logistic Academy",
+  "description": "A gamified international trade training platform featuring 3D cargo simulation, cost calculators, and interactive Chilean trade maps.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
