@@ -133,7 +133,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-<<<<<<< HEAD
     "http://localhost:3001",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3001",
@@ -144,8 +143,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3001",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3001",
-]
-=======
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -159,4 +156,3 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
->>>>>>> 704dbf14bf2ed1755f16132ff763cddc7f7e6a1e
