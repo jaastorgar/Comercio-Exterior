@@ -6,12 +6,11 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import LessonModule from './components/LessonModule';
 import Simulator3D from './components/Simulator3D';
-import CostCalculator from './components/CostCalculator';
+import CostCalculator from './src/pages/CostCalculator';
 import MapModule from './components/MapModule';
 import ProfileModule from './components/ProfileModule';
 import IncotermsSimulator from './components/IncotermsSimulator';
 import NormativeLibrary from './components/NormativeLibrary';
-import Auth from './components/Auth';
 import { AuthService, NotificationService } from './services';
 import { LogIn, Bell } from 'lucide-react';
 
