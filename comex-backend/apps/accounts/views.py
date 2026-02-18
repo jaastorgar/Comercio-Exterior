@@ -68,3 +68,12 @@ class UserProgressView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        # Lógica para actualizar si ya existe o crear si es nuevo
+        lesson = serializer.validated_data.get('lesson')
+        UserProgress.objects.update_or_create(
+            user=self.request.user, 
+            lesson=lesson,
+            defaults={'score': serializer.validated_data.get('score')}
+        )

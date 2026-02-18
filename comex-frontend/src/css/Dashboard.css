@@ -1,0 +1,72 @@
+.dashboard-container {
+  padding: 40px;
+  background-color: #111;
+  color: white;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.dashboard-buttons button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #ff7a00;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.dashboard-main {
+  display: flex;
+  gap: 30px;
+}
+
+.simulator-card {
+  flex: 2;
+  background: white;
+  color: black;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.simulator-card button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-card {
+  flex: 1;
+  background: #222;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-content {
+  background: white;
+  color: black;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+}
