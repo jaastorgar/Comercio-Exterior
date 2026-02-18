@@ -1,108 +1,106 @@
-import { useEffect, useState } from "react";
-// Importaciones corregidas según explorador de archivos
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Register from "./pages/Register";
-import LessonModule from "./pages/LessonModule";
-import { getUserProfile, getUserProgress } from "./api/accounts";
-import { ViewType } from "./types";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+// --- IMPORTS DE TUS PÁGINAS ---
+import LoginPage from './features/accounts/pages/LoginPage';
+import RegisterPage from './features/accounts/pages/RegisterPage';
+import DashboardPage from './features/dashboard/pages/DashboardPage';
+import ImportCalculatorPage from './features/finance/pages/ImportCalculatorPage';
+import CubicajePage from './features/logistics/pages/CubicajePage';
+import SocialFeedPage from './features/networking/pages/SocialFeedPage';
+import StudentsPage from './features/networking/pages/StudentsPage';
+import RegulatoryPage from './features/regulatory/pages/RegulatoryPage';
+
+// --- COMPONENTE DE RUTA PROTEGIDA ---
+// CORRECCIÓN: Usamos React.ReactNode en lugar de JSX.Element para evitar el error de tipos
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem('access_token');
   
-  const [xp, setXp] = useState(0);
-  const [lives, setLives] = useState(5);
-  const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
-  const [userName, setUserName] = useState("");
-
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const profile = await getUserProfile();
-        setUserName(profile.email);
-        setXp(profile.points);
-        
-        const progress = await getUserProgress();
-        setCompletedLessonIds(progress.map((p: any) => p.lesson));
-        
-        setIsAuthenticated(true);
-      } catch (error) {
-        setIsAuthenticated(false);
-      }
-    }
-    checkAuth();
-  }, [isAuthenticated]);
-
-  const handleLessonComplete = (lessonId: string, earnedXp: number) => {
-    setXp(prev => prev + earnedXp);
-    setCompletedLessonIds(prev => [...prev, lessonId]);
-    setCurrentView("dashboard");
-  };
-
-  const handleLoseLife = () => setLives(prev => Math.max(0, prev - 1));
-  const handleResetLives = () => setLives(5);
-
-  if (isAuthenticated === null) return <div className="loading">Cargando Sistema...</div>;
-
-  if (!isAuthenticated) {
-    return authMode === "login" ? (
-      <Login 
-        onSuccess={() => setIsAuthenticated(true)} 
-        onRegisterClick={() => setAuthMode("register")} 
-      />
-    ) : (
-      <Register 
-        onRegistered={() => setAuthMode("login")} 
-        onLoginClick={() => setAuthMode("login")} 
-      />
-    );
+  if (!token) {
+    return <Navigate to="/login" replace />;
   }
+  // React.ReactNode satisface el requerimiento de retorno
+  return <>{children}</>;
+};
 
+// --- APP PRINCIPAL CON RUTAS ---
+const App: React.FC = () => {
   return (
-    <main className="app-main">
-      {currentView === "dashboard" && (
-        <Dashboard 
-          setCurrentView={setCurrentView}
-          xp={xp}
-          completedCount={completedLessonIds.length}
-          userName={userName}
-          setXp={setXp}
-          setCompletedCount={() => {}} 
-          isGuest={false}
-        />
-      )}
+    <BrowserRouter>
+      <Routes>
+        {/* Rutas Públicas */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-      {currentView === "lessons" && (
-        <LessonModule 
-          xp={xp}
-          lives={lives}
-          completedLessonIds={completedLessonIds}
-          onComplete={handleLessonComplete}
-          onLoseLife={handleLoseLife}
-          onResetLives={handleResetLives}
+        {/* Rutas Privadas (Requieren Login) */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } 
         />
-      )}
+        
+        {/* Finanzas */}
+        <Route 
+          path="/finance/calculator" 
+          element={
+            <ProtectedRoute>
+              <ImportCalculatorPage />
+            </ProtectedRoute>
+          } 
+        />
 
-      {currentView === "simulator" && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col">
-          <div className="p-4 border-b border-zinc-800 flex justify-between items-center">
-            <h2 className="text-white font-black italic">MOTOR DE CUBICAJE 3D</h2>
-            <button 
-              onClick={() => setCurrentView("dashboard")}
-              className="bg-zinc-800 text-white px-4 py-2 rounded-lg"
-            >
-              VOLVER AL PANEL
-            </button>
-          </div>
-          <div className="flex-1 flex items-center justify-center text-zinc-500">
-            Cargando entorno de simulación...
-          </div>
-        </div>
-      )}
-    </main>
+        {/* Logística (3D) */}
+        <Route 
+          path="/logistics/cubicaje" 
+          element={
+            <ProtectedRoute>
+              <CubicajePage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Networking (Muro Social) */}
+        <Route 
+          path="/networking" 
+          element={
+            <ProtectedRoute>
+              <SocialFeedPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Networking (Buscador Estudiantes) */}
+        <Route 
+          path="/networking/students" 
+          element={
+            <ProtectedRoute>
+              <StudentsPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Normativa (Biblioteca) */}
+        <Route 
+          path="/regulatory" 
+          element={
+            <ProtectedRoute>
+              <RegulatoryPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Ruta por defecto: Redirigir al Dashboard si entra a la raíz "/" */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        
+        {/* Ruta 404: Cualquier cosa rara va al login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

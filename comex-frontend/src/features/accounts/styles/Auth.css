@@ -1,0 +1,96 @@
+:root {
+  --bg-black: #000000;
+  --text-white: #FFFFFF;
+  --primary-gradient: linear-gradient(135deg, #4B1FBF 0%, #4A6CFF 100%);
+  --accent-orange: #F57C00;
+  --input-bg: #1A1A1A;
+  --border-color: #333;
+}
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-black);
+  color: var(--text-white);
+  font-family: 'Inter Tight', sans-serif;
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2.5rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 30px rgba(75, 31, 191, 0.2); /* Sombra morada sutil */
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text; 
+  -webkit-text-fill-color: transparent;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4A6CFF;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 108, 255, 0.4);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.auth-link {
+  color: var(--accent-orange);
+  text-decoration: none;
+  font-weight: 600;
+}

@@ -1,0 +1,217 @@
+.networking-container {
+  padding: 2rem;
+  background-color: var(--bg-black);
+  min-height: 100vh;
+  color: white;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* COLUMNA IZQUIERDA: Muro */
+.feed-section {
+  flex: 2;
+  min-width: 300px;
+}
+
+.create-post-card {
+  background: #1A1A1A;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #333;
+  margin-bottom: 2rem;
+}
+
+.post-input {
+  width: 100%;
+  background: #000;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 1rem;
+  color: white;
+  resize: none;
+  font-family: inherit;
+  margin-bottom: 1rem;
+}
+
+.post-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.author-name {
+  font-weight: 700;
+  color: #4A6CFF;
+}
+
+.author-institution {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.post-content {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #eee;
+  margin-bottom: 1rem;
+}
+
+.comments-section {
+  border-top: 1px solid #333;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.comment-item {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+
+/* COLUMNA DERECHA: Buscador de Estudiantes */
+.students-sidebar {
+  flex: 1;
+  min-width: 250px;
+  background: #111;
+  padding: 1.5rem;
+  border-radius: 16px;
+  height: fit-content;
+  border: 1px solid #222;
+}
+
+.student-card-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #222;
+}
+
+.btn-connect {
+  background: transparent;
+  border: 1px solid #F57C00;
+  color: #F57C00;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-connect:hover {
+  background: #F57C00;
+  color: white;
+}
+
+/* --- DIRECTORIO DE ESTUDIANTES (StudentsPage) --- */
+
+.students-search-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #111;
+  color: white;
+  font-size: 1rem;
+}
+
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.student-card-full {
+  background: #1A1A1A; /* Un poco más claro que el fondo */
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.student-card-full:hover {
+  transform: translateY(-5px);
+  border-color: #4A6CFF;
+}
+
+.student-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4B1FBF, #4A6CFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.student-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.student-meta {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.5rem;
+}
+
+.student-tags {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.tag-badge {
+  background: rgba(245, 124, 0, 0.15); /* Naranja transparente */
+  color: #F57C00;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(245, 124, 0, 0.3);
+}
+
+.btn-connect-full {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #4A6CFF;
+  color: #4A6CFF;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-connect-full:hover {
+  background: #4A6CFF;
+  color: white;
+}

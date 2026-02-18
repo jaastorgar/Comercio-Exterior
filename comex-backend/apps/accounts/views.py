@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import get_object_or_404
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -12,8 +13,10 @@ from .serializers import (
 )
 from .models import Course, Lesson, UserProgress
 
-
 class RegisterView(APIView):
+    # Esta línea permite que cualquiera se registre sin estar logueado
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -23,6 +26,9 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    # Esta línea permite que cualquiera intente iniciar sesión
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -35,21 +41,27 @@ class LoginView(APIView):
             })
         return Response(serializer.errors, status=400)
 
+# --- VISTAS PRIVADAS (Requieren estar logueado) ---
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        serializer = UserProfileSerializer(request.user.profile)
-        return Response(serializer.data)
+        # Verificamos si el usuario tiene perfil, si no, devolvemos error controlado
+        if hasattr(request.user, 'profile'):
+            serializer = UserProfileSerializer(request.user.profile)
+            return Response(serializer.data)
+        return Response({"detail": "Perfil no encontrado"}, status=404)
 
 
 class CourseListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
 
 class LessonListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = LessonSerializer
 
     def get_queryset(self):
@@ -67,13 +79,13 @@ class UserProgressView(generics.ListCreateAPIView):
         return UserProgress.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-    
-    def perform_create(self, serializer):
         # Lógica para actualizar si ya existe o crear si es nuevo
+        # (Se eliminó la función duplicada que tenías antes)
         lesson = serializer.validated_data.get('lesson')
+        score = serializer.validated_data.get('score', 0)
+        
         UserProgress.objects.update_or_create(
             user=self.request.user, 
             lesson=lesson,
-            defaults={'score': serializer.validated_data.get('score')}
+            defaults={'score': score}
         )

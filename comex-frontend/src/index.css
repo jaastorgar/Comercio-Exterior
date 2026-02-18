@@ -1,0 +1,18 @@
+:root {
+  --bg-black: #000000;
+  --text-white: #FFFFFF;
+  --primary-gradient: linear-gradient(135deg, #4B1FBF 0%, #4A6CFF 100%);
+  --accent-orange: #F57C00;
+  --input-bg: #1A1A1A;
+  --border-color: #333;
+  
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-black);
+  color: var(--text-white);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}

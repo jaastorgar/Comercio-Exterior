@@ -1,31 +1,23 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import axios from 'axios';
 
-export async function apiRequest(
-  endpoint: string,
-  method: string = "GET",
-  data?: any,
-  auth: boolean = false
-) {
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
+// Accedemos directamente a la variable de entorno.
+// TypeScript ahora lo reconocerá gracias al archivo vite-env.d.ts
+const API_URL = import.meta.env.VITE_API_URL;
 
-  if (auth) {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+const client = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para inyectar el token en cada petición
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-  });
-
-  if (!response.ok) {
-    throw new Error("Error en la petición");
-  }
-
-  return response.json();
-}
+export default client;
