@@ -1,55 +1,112 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { logisticsService } from '../services/logistics.service';
 import { Container, CargoSimulationResponse } from '../types/logistics.types';
-import CargoVisualizer from '../components/CargoVisualizer';
 import '../styles/Logistics.css';
 
 const CubicajePage: React.FC = () => {
+  const mountRef = useRef<HTMLDivElement>(null);
   const [containers, setContainers] = useState<Container[]>([]);
-  const [selectedContainerId, setSelectedContainerId] = useState<number>(0);
-  
-  // Estado del formulario
-  const [formData, setFormData] = useState({
-    length: 0.5, // Metros por defecto
-    width: 0.4,
-    height: 0.3,
-    quantity: 50
-  });
+  const [selectedContainer, setSelectedContainer] = useState<string>('');
+  const [boxDims, setBoxDims] = useState({ length: 0.5, width: 0.4, height: 0.3, quantity: 10 });
+  const [result, setResult] = useState<CargoSimulationResponse | null>(null);
 
-  const [simulationResult, setSimulationResult] = useState<CargoSimulationResponse | null>(null);
+  // Referencias de Three.js
+  const sceneRef = useRef(new THREE.Scene());
+  const boxesGroupRef = useRef(new THREE.Group());
 
-  // Cargar contenedores al inicio
   useEffect(() => {
-    const loadContainers = async () => {
-      try {
-        const data = await logisticsService.getContainers();
-        setContainers(data);
-        if (data.length > 0) setSelectedContainerId(data[0].id);
-      } catch (error) {
-        console.error("Error cargando contenedores", error);
-      }
-    };
     loadContainers();
+    initThreeJS();
   }, []);
 
-  // Obtener objeto del contenedor seleccionado para pasarlo al 3D
-  const activeContainer = containers.find(c => c.id === Number(selectedContainerId));
-
-  const handleSimulate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeContainer) return;
-
+  const loadContainers = async () => {
     try {
-      const result = await logisticsService.simulate({
-        container_id: activeContainer.id,
-        box_length: formData.length,
-        box_width: formData.width,
-        box_height: formData.height,
-        quantity: formData.quantity
+      const data = await logisticsService.getContainers();
+      setContainers(data);
+    } catch (e) { console.error(e); }
+  };
+
+  const initThreeJS = () => {
+    if (!mountRef.current) return;
+
+    const width = mountRef.current.clientWidth;
+    const height = mountRef.current.clientHeight;
+
+    // 1. Escena y Cámara
+    const scene = sceneRef.current;
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+    camera.position.set(10, 10, 10);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    mountRef.current.appendChild(renderer.domElement);
+
+    // 2. Luces (Crucial para ver el modelo)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 1.5);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+
+    // 3. Controles
+    const controls = new OrbitControls(camera, renderer.domElement);
+    scene.add(boxesGroupRef.current);
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // Limpieza al desmontar
+    return () => {
+      mountRef.current?.removeChild(renderer.domElement);
+    };
+  };
+
+  const handleSimulate = async () => {
+    if (!selectedContainer) return;
+    
+    try {
+      const res = await logisticsService.simulate({
+        container_id: Number(selectedContainer),
+        box_length: boxDims.length,
+        box_width: boxDims.width,
+        box_height: boxDims.height,
+        quantity: boxDims.quantity
       });
-      setSimulationResult(result);
-    } catch (error) {
-      console.error("Error en simulación", error);
+      setResult(res);
+      update3D(res);
+    } catch (e) { alert("Error en la simulación"); }
+  };
+
+  const update3D = (data: CargoSimulationResponse) => {
+    boxesGroupRef.current.clear();
+    const container = containers.find(c => c.id === data.container);
+    if (!container) return;
+
+    // Dibujar Contenedor (Cian Neón para visibilidad)
+    const contGeom = new THREE.BoxGeometry(container.length, container.height, container.width);
+    const contMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.3 });
+    boxesGroupRef.current.add(new THREE.Mesh(contGeom, contMat));
+
+    // Dibujar Cajas (Naranja brillante)
+    const boxGeom = new THREE.BoxGeometry(data.box_length, data.box_height, data.box_width);
+    const boxMat = new THREE.MeshPhongMaterial({ color: 0xffa500 });
+
+    for (let i = 0; i < data.quantity; i++) {
+      const box = new THREE.Mesh(boxGeom, boxMat);
+      // Posicionamiento simple para visualización
+      box.position.set(
+        (Math.random() - 0.5) * (container.length * 0.8),
+        (Math.random() - 0.5) * (container.height * 0.8),
+        (Math.random() - 0.5) * (container.width * 0.8)
+      );
+      boxesGroupRef.current.add(box);
     }
   };
 
@@ -57,90 +114,61 @@ const CubicajePage: React.FC = () => {
     <div className="logistics-container">
       <div className="logistics-header">
         <h1>Simulador de Cubicaje 3D</h1>
-        <p>Visualiza cómo se distribuye tu carga dentro del contenedor.</p>
+        <p>Optimiza el espacio de tus contenedores en tiempo real.</p>
       </div>
 
       <div className="logistics-layout">
-        
-        {/* PANEL IZQUIERDO: FORMULARIO */}
         <div className="controls-panel">
-          <form onSubmit={handleSimulate}>
+          <h3>Configuración de Carga</h3>
+          <div className="form-group">
+            <label>Contenedor</label>
+            <select className="form-input" value={selectedContainer} onChange={e => setSelectedContainer(e.target.value)}>
+              <option value="">Seleccione un tipo...</option>
+              {containers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+
+          <div className="grid-inputs">
             <div className="form-group">
-              <label className="form-label">Tipo de Contenedor</label>
-              <select 
-                className="form-input"
-                value={selectedContainerId}
-                onChange={(e) => setSelectedContainerId(Number(e.target.value))}
-              >
-                {containers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <label>Largo (m)</label>
+              <input type="number" step="0.1" value={boxDims.length} onChange={e => setBoxDims({...boxDims, length: +e.target.value})} />
             </div>
-
             <div className="form-group">
-              <label className="form-label">Largo Caja (m)</label>
-              <input type="number" step="0.01" className="form-input" 
-                value={formData.length} 
-                onChange={e => setFormData({...formData, length: Number(e.target.value)})} 
-              />
+              <label>Ancho (m)</label>
+              <input type="number" step="0.1" value={boxDims.width} onChange={e => setBoxDims({...boxDims, width: +e.target.value})} />
             </div>
-            
             <div className="form-group">
-              <label className="form-label">Ancho Caja (m)</label>
-              <input type="number" step="0.01" className="form-input" 
-                value={formData.width} 
-                onChange={e => setFormData({...formData, width: Number(e.target.value)})} 
-              />
+              <label>Alto (m)</label>
+              <input type="number" step="0.1" value={boxDims.height} onChange={e => setBoxDims({...boxDims, height: +e.target.value})} />
             </div>
-
             <div className="form-group">
-              <label className="form-label">Alto Caja (m)</label>
-              <input type="number" step="0.01" className="form-input" 
-                value={formData.height} 
-                onChange={e => setFormData({...formData, height: Number(e.target.value)})} 
-              />
+              <label>Cantidad</label>
+              <input type="number" value={boxDims.quantity} onChange={e => setBoxDims({...boxDims, quantity: +e.target.value})} />
             </div>
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Cantidad de Cajas</label>
-              <input type="number" className="form-input" 
-                value={formData.quantity} 
-                onChange={e => setFormData({...formData, quantity: Number(e.target.value)})} 
-              />
-            </div>
+          <button className="btn-calculate" onClick={handleSimulate}>Actualizar Visualización</button>
 
-            <button type="submit" className="btn-primary">Actualizar 3D</button>
-          </form>
-        </div>
-
-        {/* PANEL DERECHO: VISUALIZADOR 3D */}
-        <div className="visualizer-panel">
-          
-          {activeContainer && (
-            <CargoVisualizer 
-              containerDims={{ l: parseFloat(activeContainer.length.toString()), w: parseFloat(activeContainer.width.toString()), h: parseFloat(activeContainer.height.toString()) }}
-              boxDims={{ l: formData.length, w: formData.width, h: formData.height }}
-              quantity={formData.quantity}
-            />
-          )}
-
-          {simulationResult && (
+          {result && (
             <div className="metrics-bar">
               <div className="metric-item">
-                <span className="form-label">Ocupación</span>
-                <span className="metric-value">{simulationResult.usage_percentage.toFixed(1)}%</span>
+                <span className="metric-label">Uso Vol.</span>
+                <span className="metric-value">{result.usage_percentage}%</span>
               </div>
               <div className="metric-item">
-                <span className="form-label">Estado</span>
-                <span className={`metric-value ${simulationResult.fits ? 'fit-success' : 'fit-error'}`}>
-                  {simulationResult.fits ? 'CABE ✅' : 'NO CABE ❌'}
+                <span className="metric-label">Estado</span>
+                <span className={`metric-value ${result.fits ? 'fit-success' : 'fit-error'}`}>
+                  {result.fits ? 'CABE' : 'NO CABE'}
                 </span>
               </div>
             </div>
           )}
         </div>
 
+        <div className="visualizer-panel">
+          <div className="viewport" ref={mountRef}></div>
+          <p className="hint">Usa el mouse para rotar y la rueda para hacer zoom</p>
+        </div>
       </div>
     </div>
   );
