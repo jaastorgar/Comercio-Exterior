@@ -4,12 +4,11 @@ import { ImportSimulationResponse } from '../types/finance.types';
 import '../styles/Finance.css';
 
 const ImportCalculatorPage: React.FC = () => {
-  // Estados para los inputs
   const [values, setValues] = useState({
-    fob: '',
+    fob_value: '',
     freight: '',
     insurance: '',
-    rate: '950' // Valor por defecto o traer de API Rates luego
+    exchange_rate: '950'
   });
 
   const [result, setResult] = useState<ImportSimulationResponse | null>(null);
@@ -23,11 +22,13 @@ const ImportCalculatorPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Enviamos los datos mapeados correctamente al servicio
       const response = await financeService.calculate({
-        fob_value: Number(values.fob),
-        freight_value: Number(values.freight),
-        insurance_value: Number(values.insurance),
-        exchange_rate: Number(values.rate)
+        name: `Cálculo ${new Date().toLocaleDateString()}`,
+        fob_value: Number(values.fob_value),
+        freight: Number(values.freight),
+        insurance: Number(values.insurance),
+        exchange_rate: Number(values.exchange_rate)
       });
       setResult(response);
     } catch (error) {
@@ -38,104 +39,67 @@ const ImportCalculatorPage: React.FC = () => {
     }
   };
 
-  // Formateador de moneda (Pesos Chilenos)
-  const formatCLP = (amount: number) => {
-    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
-  };
-
-  // Formateador de moneda (Dólares)
-  const formatUSD = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-  };
+  const formatCLP = (amount: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
+  const formatUSD = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 
   return (
     <div className="finance-container">
       <div className="finance-header">
         <h1 className="finance-title">Calculadora de Importación</h1>
-        <p style={{ color: '#aaa' }}>Estima tus impuestos aduaneros y costo total según normativa chilena.</p>
+        <p style={{ color: '#aaa' }}>Estima tus costos totales según la normativa chilena.</p>
       </div>
 
       <div className="calculator-layout">
-        
-        {/* FORMULARIO DE ENTRADA */}
         <div className="form-card">
           <form onSubmit={handleCalculate}>
             <div className="input-group">
               <label className="input-label">Valor FOB (Mercancía USD)</label>
-              <input 
-                type="number" name="fob" 
-                className="currency-input" placeholder="0.00" 
-                value={values.fob} onChange={handleChange} required 
-              />
+              <input type="number" name="fob_value" className="currency-input" value={values.fob_value} onChange={handleChange} required />
             </div>
-            
             <div className="input-group">
               <label className="input-label">Flete Internacional (USD)</label>
-              <input 
-                type="number" name="freight" 
-                className="currency-input" placeholder="0.00" 
-                value={values.freight} onChange={handleChange} required 
-              />
+              <input type="number" name="freight" className="currency-input" value={values.freight} onChange={handleChange} required />
             </div>
-
             <div className="input-group">
               <label className="input-label">Seguro (USD)</label>
-              <input 
-                type="number" name="insurance" 
-                className="currency-input" placeholder="0.00" 
-                value={values.insurance} onChange={handleChange} required 
-              />
+              <input type="number" name="insurance" className="currency-input" value={values.insurance} onChange={handleChange} required />
             </div>
-
             <div className="input-group">
               <label className="input-label">Tipo de Cambio (CLP)</label>
-              <input 
-                type="number" name="rate" 
-                className="currency-input" 
-                value={values.rate} onChange={handleChange} required 
-              />
+              <input type="number" name="exchange_rate" className="currency-input" value={values.exchange_rate} onChange={handleChange} required />
             </div>
-
             <button type="submit" className="btn-calculate" disabled={loading}>
               {loading ? 'Calculando...' : 'Calcular Costos'}
             </button>
           </form>
         </div>
 
-        {/* RESULTADOS */}
         {result && (
           <div className="result-card">
-            <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Desglose de Costos</h3>
-            
+            <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Desglose Oficial</h3>
             <div className="result-row">
-              <span className="result-label">Valor CIF (USD)</span>
-              <span className="result-value" style={{ color: '#4A6CFF' }}>{formatUSD(result.cif_value)}</span>
+              <span>CIF (USD)</span>
+              <span style={{ color: '#4A6CFF' }}>{formatUSD(result.cif_usd)}</span>
             </div>
-            
             <div className="result-row">
-              <span className="result-label">Valor CIF (CLP)</span>
-              <span className="result-value">{formatCLP(result.cif_clp)}</span>
+              <span>CIF (CLP)</span>
+              <span>{formatCLP(result.cif_clp)}</span>
             </div>
-
             <hr style={{ borderColor: '#333', margin: '10px 0' }} />
-            
             <div className="result-row">
-              <span className="result-label">Derecho Ad Valorem (6%)</span>
-              <span className="result-value" style={{ color: '#ff4444' }}>+ {formatCLP(result.ad_valorem)}</span>
+              <span>Ad Valorem (6%)</span>
+              <span style={{ color: '#ff4444' }}>+ {formatCLP(result.ad_valorem)}</span>
             </div>
-            
             <div className="result-row">
-              <span className="result-label">IVA (19%)</span>
-              <span className="result-value" style={{ color: '#ff4444' }}>+ {formatCLP(result.iva)}</span>
+              <span>IVA (19%)</span>
+              <span style={{ color: '#ff4444' }}>+ {formatCLP(result.iva)}</span>
             </div>
-
             <div className="total-row">
-              <span>Costo Total Importación</span>
+              <span>Costo Total</span>
               <span className="total-value">{formatCLP(result.total_cost)}</span>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
