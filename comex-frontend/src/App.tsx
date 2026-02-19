@@ -13,6 +13,7 @@ import RegulatoryPage from './features/regulatory/pages/RegulatoryPage';
 import AcademyPage from './features/academy/pages/AcademyPage';
 import LessonPlayerPage from './features/academy/pages/LessonPlayerPage';
 import ProfilePage from './features/accounts/pages/ProfilePage';
+import ChatPage from './features/networking/pages/ChatPage';
 
 // --- COMPONENTE DE RUTA PROTEGIDA ---
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -121,6 +122,16 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Chat Privado */}
+        <Route 
+          path="/networking/chat/:userId" 
+          element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           } 
         />

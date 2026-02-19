@@ -1,5 +1,6 @@
 export interface StudentProfile {
     id: number;
+    user: number;
     full_name: string;
     email: string;
     institution: string;
@@ -7,6 +8,7 @@ export interface StudentProfile {
     study_level: string;
     area_interest: string;
     bio: string;
+    connection_status?: 'pending' | 'accepted' | 'rejected' | null;
 }
 
 export interface Comment {
@@ -32,4 +34,14 @@ export interface ConnectionRequest {
     from_email: string;
     from_institution: string;
     status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface Message {
+    id: number;
+    sender: number;
+    sender_email: string;
+    receiver: number;
+    content: string;
+    is_read: boolean;
+    timestamp: string;
 }
