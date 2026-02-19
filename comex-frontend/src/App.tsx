@@ -10,16 +10,17 @@ import CubicajePage from './features/logistics/pages/CubicajePage';
 import SocialFeedPage from './features/networking/pages/SocialFeedPage';
 import StudentsPage from './features/networking/pages/StudentsPage';
 import RegulatoryPage from './features/regulatory/pages/RegulatoryPage';
+import AcademyPage from './features/academy/pages/AcademyPage';
+import LessonPlayerPage from './features/academy/pages/LessonPlayerPage';
+import ProfilePage from './features/accounts/pages/ProfilePage';
 
 // --- COMPONENTE DE RUTA PROTEGIDA ---
-// CORRECCIÓN: Usamos React.ReactNode en lugar de JSX.Element para evitar el error de tipos
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('access_token');
   
   if (!token) {
     return <Navigate to="/login" replace />;
   }
-  // React.ReactNode satisface el requerimiento de retorno
   return <>{children}</>;
 };
 
@@ -32,7 +33,9 @@ const App: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Rutas Privadas (Requieren Login) */}
+        {/* --- RUTAS PRIVADAS --- */}
+        
+        {/* Dashboard Principal */}
         <Route 
           path="/dashboard" 
           element={
@@ -42,6 +45,26 @@ const App: React.FC = () => {
           } 
         />
         
+        {/* ACADEMIA (NUEVO) */}
+        {/* Menú Principal de Cursos */}
+        <Route 
+          path="/academy" 
+          element={
+            <ProtectedRoute>
+              <AcademyPage />
+            </ProtectedRoute>
+          } 
+        />
+        {/* Reproductor de Lecciones */}
+        <Route 
+          path="/academy/play/:courseId" 
+          element={
+            <ProtectedRoute>
+              <LessonPlayerPage />
+            </ProtectedRoute>
+          } 
+        />
+
         {/* Finanzas */}
         <Route 
           path="/finance/calculator" 
@@ -92,10 +115,20 @@ const App: React.FC = () => {
           } 
         />
 
-        {/* Ruta por defecto: Redirigir al Dashboard si entra a la raíz "/" */}
+        {/* Perfil de Usuario */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Ruta por defecto */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
-        {/* Ruta 404: Cualquier cosa rara va al login */}
+        {/* Ruta 404 */}
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>

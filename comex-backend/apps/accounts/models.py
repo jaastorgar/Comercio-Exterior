@@ -46,6 +46,8 @@ class UserProfile(models.Model):
     level = models.IntegerField(default=1)
     points = models.IntegerField(default=0)
     ranking_score = models.IntegerField(default=0)
+    bio = models.TextField(blank=True, null=True, verbose_name="Biografía")
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return f"Perfil académico de {self.user.email}"
@@ -74,6 +76,7 @@ class UserProgress(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
     score = models.IntegerField(default=0)
+    completed_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("user", "lesson")

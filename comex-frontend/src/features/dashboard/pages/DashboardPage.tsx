@@ -34,13 +34,13 @@ const DashboardPage: React.FC = () => {
 
         <div className="rates-ticker">
           <div className="rate-card">
-            <span className="rate-label">Dólar Observado</span>
+            <span className="rate-label">USD Observado</span>
             <span className="rate-value">
               {dolarObs ? `$${dolarObs.value}` : 'Cargando...'}
             </span>
           </div>
           <div className="rate-card">
-            <span className="rate-label">Dólar Aduanero</span>
+            <span className="rate-label">USD Aduana</span>
             <span className="rate-value">
               {dolarAduana ? `$${dolarAduana.value}` : 'Cargando...'}
             </span>
@@ -48,17 +48,24 @@ const DashboardPage: React.FC = () => {
         </div>
       </header>
 
-      <hr style={{ borderColor: '#333', marginBottom: '2rem' }} />
-
-      {/* 2. Grid de Servicios Principales */}
+      {/* 2. Grid de Herramientas Principales */}
       <div className="dashboard-grid">
         
+        {/* NUEVA OPCIÓN: MI PERFIL */}
+        <Link to="/profile" className="action-card highlight-card">
+          <div className="card-icon">👤</div>
+          <div>
+            <h3 className="card-title">Mi Perfil</h3>
+            <p className="card-desc">Gestiona tu biografía, avatar y revisa tu nivel actual.</p>
+          </div>
+        </Link>
+
         {/* LOGÍSTICA */}
         <Link to="/logistics/cubicaje" className="action-card">
           <div className="card-icon">📦</div>
           <div>
-            <h3 className="card-title">Cubicar Carga</h3>
-            <p className="card-desc">Simula contenedores y pallets en 3D.</p>
+            <h3 className="card-title">Cubicaje 3D</h3>
+            <p className="card-desc">Optimiza la carga de contenedores y pallets.</p>
           </div>
         </Link>
 
@@ -95,8 +102,8 @@ const DashboardPage: React.FC = () => {
         <h3 style={{ marginBottom: '1rem' }}>📡 Red de Estudiantes</h3>
         <p style={{ color: '#aaa' }}>
           Conecta con compañeros de tu institución. 
-          <Link to="/networking" style={{ color: '#4A6CFF', marginLeft: '10px' }}>
-            Ir al muro social &rarr;
+          <Link to="/networking" style={{ color: '#4A008B', marginLeft: '5px', fontWeight: 'bold' }}>
+            Ir al muro social →
           </Link>
         </p>
       </div>

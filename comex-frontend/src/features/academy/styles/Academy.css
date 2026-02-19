@@ -1,0 +1,134 @@
+/* --- Academy.css --- */
+
+/* Contenedor General */
+.academy-container {
+  padding: 2rem;
+  background-color: var(--bg-black);
+  min-height: 100vh;
+  color: var(--text-white);
+}
+
+.academy-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.academy-title {
+  font-size: 2.5rem;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+/* Grid de Cursos (Menu) */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.course-card {
+  background: #1A1A1A;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: transform 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  border-color: #4A6CFF;
+}
+
+.course-title {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.course-progress-container {
+  background: #333;
+  height: 8px;
+  border-radius: 4px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.course-progress-bar {
+  height: 100%;
+  background: var(--accent-orange);
+  transition: width 0.5s ease;
+}
+
+.btn-start {
+  background: var(--primary-gradient);
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  text-decoration: none; /* Para Link */
+  text-align: center;
+  display: block;
+}
+
+/* Reproductor de Lecciones (Player) */
+.lesson-player-layout {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #111;
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid #333;
+}
+
+.lesson-content {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #ddd;
+  margin: 2rem 0;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+}
+
+.lesson-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  border-top: 1px solid #333;
+  padding-top: 1rem;
+}
+
+.btn-complete {
+  background: #00C851; /* Verde éxito */
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-complete:hover {
+  opacity: 0.9;
+}
+
+.btn-back {
+  background: transparent;
+  border: 1px solid #666;
+  color: #ccc;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}

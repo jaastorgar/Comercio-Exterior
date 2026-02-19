@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -45,13 +46,24 @@ class LoginView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request):
-        # Verificamos si el usuario tiene perfil, si no, devolvemos error controlado
         if hasattr(request.user, 'profile'):
             serializer = UserProfileSerializer(request.user.profile)
             return Response(serializer.data)
         return Response({"detail": "Perfil no encontrado"}, status=404)
+
+    def patch(self, request):
+        user = request.user
+        profile = user.profile
+        
+        # Actualizamos el perfil con los datos recibidos (bio, avatar)
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
 
 class CourseListView(generics.ListAPIView):
